@@ -1,6 +1,4 @@
 # cosc_254_final
-Sources:
-
 MaxClique: Scalable Algorithms for Association Mining
 
 TM: A Transaction Mapping Algorithm for FrequentItemsets Mining
