@@ -31,11 +31,11 @@ def apriori():
     else:
         frequent_items.sort()
     print('obtained ' + str(len(frequent_items)) + ' frequent items')
-
     frequent_itemsets = [(x, items_support[x]) for x in frequent_items]
+
     k = 1
     frequentsK = frequent_items
-    # generate k+1 itemsets
+    # generate itemsets of length k+1
     while True:
         if k == 1:
             candidates = get_candidates_2(frequentsK)
