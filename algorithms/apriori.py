@@ -112,6 +112,8 @@ def check_candidate_support(candidate, transactions):
     k = len(candidate.itemset)
     supp = 0
     for transaction in transactions:
+        if len(transaction)<len(candidate.itemset):
+            continue
         if set(candidate.itemset) <= set(transaction):
             supp += 1
     candidate.support = supp
