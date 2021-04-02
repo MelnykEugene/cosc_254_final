@@ -4,7 +4,6 @@ import math
 from item_set import ItemSet
 
 dataset = '/Users/yevhenmelnyk/Desktop/data_mining/mining_final/datasets/mushroom.dat'
-print(dataset)
 output = './output/apriori/' + sys.argv[1]
 minsup = float(sys.argv[2])  # absolute
 data_size = int(sys.argv[3])
@@ -44,14 +43,13 @@ def apriori():
             candidates = get_candidates_2(frequentsK)
         else:
             # pruning happens here
-            candidates = get_candidates_kp1(frequentsK, k + 1)
+            candidates = get_candidates_kp1(frequentsK, k )
         print('obtained ' + str(len(candidates)) + ' candidates of length ' + str(k + 1))
         k += 1
         # only keep those who are frequent
         frequentsK = [candidate for candidate in candidates if check_candidate_support(candidate, transactions)]
-
         print('of which ' + str(len(frequentsK)) + ' are frequent')
-
+        print()
         # save into the results list
         for itemset in frequentsK:
             frequent_itemsets.append((itemset.itemset, itemset.support))
@@ -87,7 +85,7 @@ def get_candidates_kp1(frequentsK, k):
                 # join to make a new k+1 candidate
                 candidate = []
                 candidate.extend(itemset1)
-                candidate.append(itemset2[len(itemset2) - 1])
+                candidate.append(itemset2[-1])
                 candidate = ItemSet(candidate)
             else:
                 # some optimization here by conditionally continuing the OUTER loop?
@@ -113,7 +111,6 @@ def check_frequency_of_all_immediate_subsets(candidate, frequentsK_1):
 
 # check whether out K+1 candidate is frequent by naive counting
 def check_candidate_support(candidate, transactions):
-    k = len(candidate.itemset)
     supp = 0
     for transaction in transactions:
         if len(transaction) < len(candidate.itemset):
@@ -125,6 +122,3 @@ def check_candidate_support(candidate, transactions):
         return True
     else:
         return False
-
-
-print(apriori())

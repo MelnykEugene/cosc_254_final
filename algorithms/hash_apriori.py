@@ -4,11 +4,12 @@ from item_set import ItemSet
 from hash_tree import HashTree
 
 dataset = '/Users/yevhenmelnyk/Desktop/data_mining/mining_final/datasets/mushroom.dat'
+print('dataset: ' + dataset)
 output = './output/apriori/' + sys.argv[1]
 minsup = float(sys.argv[2])  # absolute
+print('minsup: ' + str(minsup))
 data_size = int(sys.argv[3])
-
-branch_factor = 40
+branch_factor = None
 
 
 def hash_apriori(dataset):
@@ -18,19 +19,21 @@ def hash_apriori(dataset):
     # this can be made into an array indexed by int(item) to save memory
     items_support = collections.defaultdict(int)
 
-    max_item=0
+    max_item = 0
     with open(dataset, 'r') as f:
         for line in f:
             transaction = [int(x) for x in str.split(line)]
             transactions.append(transaction)
             for item in transaction:
-                if item>max_item:max_item=item
+                if item > max_item: max_item = item
                 items_support[item] += 1
+
     print('read transactions into memory')
-    branch_factor=10
+    global branch_factor
+    branch_factor=max_item
     print('branch factor set to ' + str(branch_factor))
 
-
+    print()
     frequent_items = [x for x in items_support.keys() if items_support[x] >= minsup]
     if not frequent_items:
         return []
@@ -44,59 +47,62 @@ def hash_apriori(dataset):
     frequent_tree_k = frequent_items
     # generate candidates of length k+1
     while True:
-        print('mining candidate tree for k = '+str(k+1))
+        print('mining candidate tree for k = ' + str(k + 1))
         if k == 1:
-            candidates_tree_kp1 = get_candidates_2(frequent_tree_k,verbose= False)
+            candidates_tree_kp1 = get_candidates_2(frequent_tree_k, verbose=False)
         else:
-            candidates_tree_kp1 = get_candidates_kp1(frequent_tree_k, k , verbose=False)
+            candidates_tree_kp1 = get_candidates_kp1(frequent_tree_k, verbose=False)
 
         if candidates_tree_kp1.get_candidate_count() == 0:
             print('found no new candidates at k = ' + str(k + 1))
             print('finished')
             break
 
-        #print leaves debug
+        # print leaves debug
         # node = candidates_tree_kp1.last_leaf
         # while node is not None:
         #     print('leaf has itemsets '+str([(itemset.itemset,itemset.support) for itemset in node.itemsets]))
         #     node=node.next_leaf
 
-        #print first level interior debug
+        # print first level interior debug
         # node = candidates_tree_kp1.root
         # for i in range(len(node.childs)):
         #     next=node.childs[i]
         #     if next is not None:
         #         print(next)
 
-
-        print('obtained ' + str(candidates_tree_kp1.get_candidate_count()) + ' candidates in candidate hashtree for k = ' + str(k + 1))
+        print('obtained ' + str(
+            candidates_tree_kp1.get_candidate_count()) + ' candidates in candidate hashtree for k = ' + str(k + 1))
 
         print('calculating supports...')
         # calculate supports for the new candidate tree
         for transaction in transactions:
-            if len(transaction) >= k+1:
+            if len(transaction) >= k + 1:
                 candidates_tree_kp1.update_supports(transaction)
 
-        print('done. filtering candidate hashtree ')
+        print('filtering candidate hashtree...')
 
         # validate support, save frequents, remove infrequents
         node = candidates_tree_kp1.last_leaf
         while node is not None:
-            for (i, itemset) in enumerate(node.itemsets):
-                #print(itemset.itemset,itemset.support)
+            # we are going to go through a list and remove items from it
+            # to avoid problems with iteration of a mutating list, we instead iterate through a copy
+            itemsets_to_iterate = node.itemsets.copy()
+            for itemset in itemsets_to_iterate:
                 if itemset.support >= minsup:
                     frequent_itemsets.append((itemset.itemset, itemset.support))
                 else:
                     node.itemsets.remove(itemset)
-                    candidates_tree_kp1.population-=1
+                    candidates_tree_kp1.population -= 1
             node = node.next_leaf
 
         print(str(candidates_tree_kp1.get_candidate_count()) + ' candidates are frequent')
+        print()
         # move to the next iteration using current successful candidates to generate k+2
         k += 1
         frequent_tree_k = candidates_tree_kp1
 
-        if frequent_tree_k.get_candidate_count ==0:
+        if frequent_tree_k.get_candidate_count() == 0:
             print('finished')
             break
 
@@ -104,19 +110,20 @@ def hash_apriori(dataset):
 
 
 # generates candidates of length 2
-def get_candidates_2(frequent_items,verbose=False):
+def get_candidates_2(frequent_items, verbose=False):
     candidate_tree = HashTree(2, branch_factor)
     for i in range(len(frequent_items)):
         for j in range(i + 1, len(frequent_items)):
-            candidate_tree.insert_candidate(ItemSet([frequent_items[i], frequent_items[j]]),verbose)
+            candidate_tree.insert_candidate(ItemSet([frequent_items[i], frequent_items[j]]), verbose)
     return candidate_tree
 
 
 # generates candidates of length k+1
 # using the union of candidates of length k that share first k-1 items (like normal apriori)
 # leveraging lexicographic order and the fact that candidates sharing the first k-1 items live in the same leaf
-def get_candidates_kp1(hashtree_k, k, verbose=False):
-    candidate_hashtree_kp1 = HashTree(k+1, branch_factor)
+def get_candidates_kp1(hashtree_k, verbose=False):
+    k = hashtree_k.itemset_size
+    candidate_hashtree_kp1 = HashTree(k + 1, branch_factor)
 
     node = hashtree_k.last_leaf
     while node is not None:
@@ -135,10 +142,9 @@ def get_candidates_kp1(hashtree_k, k, verbose=False):
                 else:
                     continue
                 if check_frequency_of_all_immediate_subsets(candidate, hashtree_k):
-                    candidate_hashtree_kp1.insert_candidate(ItemSet(candidate),verbose)
+                    candidate_hashtree_kp1.insert_candidate(ItemSet(candidate), verbose)
 
         node = node.next_leaf
-
     return candidate_hashtree_kp1
 
 
@@ -155,4 +161,8 @@ def check_frequency_of_all_immediate_subsets(candidate_kp1, hash_tree_k):
             return False
     return True
 
-print(hash_apriori(dataset))
+
+from apriori import apriori
+aprioris = apriori()
+hashes=hash_apriori(dataset)
+print([x for x in aprioris if x not in hashes] + [x for x in hashes if x not in aprioris])
