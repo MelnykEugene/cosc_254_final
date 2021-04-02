@@ -2,8 +2,9 @@ import sys
 import collections
 from item_set import ItemSet
 from hash_tree import HashTree
+import timeit
 
-dataset = '/Users/yevhenmelnyk/Desktop/data_mining/mining_final/datasets/mushroom.dat'
+dataset = '/Users/yevhenmelnyk/Desktop/data_mining/mining_final/datasets/T40I10D100k.dat'
 print('dataset: ' + dataset)
 output = './output/apriori/' + sys.argv[1]
 minsup = float(sys.argv[2])  # absolute
@@ -12,7 +13,7 @@ data_size = int(sys.argv[3])
 branch_factor = None
 
 
-def hash_apriori(dataset):
+def hash_apriori():
     # in-memory transaction storage
     transactions = []
 
@@ -163,6 +164,11 @@ def check_frequency_of_all_immediate_subsets(candidate_kp1, hash_tree_k):
 
 
 from apriori import apriori
-aprioris = apriori()
-hashes=hash_apriori(dataset)
-print([x for x in aprioris if x not in hashes] + [x for x in hashes if x not in aprioris])
+#aprioris = apriori()
+#hashes=hash_apriori()
+
+print('apriori took: ' + str(timeit.timeit(apriori,number=1)))
+print('=========================================================')
+print('hashapriori took: '+str(timeit.timeit(hash_apriori,number=1)))
+
+#print([x for x in aprioris if x not in hashes] + [x for x in hashes if x not in aprioris])

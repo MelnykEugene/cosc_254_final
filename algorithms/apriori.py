@@ -3,7 +3,7 @@ import collections
 import math
 from item_set import ItemSet
 
-dataset = '/Users/yevhenmelnyk/Desktop/data_mining/mining_final/datasets/mushroom.dat'
+dataset = '/Users/yevhenmelnyk/Desktop/data_mining/mining_final/datasets/T40I10D100k.dat'
 output = './output/apriori/' + sys.argv[1]
 minsup = float(sys.argv[2])  # absolute
 data_size = int(sys.argv[3])

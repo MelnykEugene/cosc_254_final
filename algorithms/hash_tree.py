@@ -116,15 +116,11 @@ class HashTree:
                 # print('update() arrived at leaf node with candidates' + str(next_node.itemsets))
                 # print('meanwhile fixed is '+str(new_fixed))
                 for j in range(i + 1, len(transaction)):
+                    new_new_fixed=new_fixed.copy()
+                    new_new_fixed.append(transaction[j])
                     for itemset in next_node.itemsets:
-                        if self.check_equals(new_fixed, itemset.itemset, transaction[j]):
+                        if new_new_fixed==itemset.itemset:
                             itemset.inc_support()
-
-    # checks if itemset+lastitem equals fixed
-    def check_equals(self, fixed, itemset, last_item):
-        full_fixed = fixed.copy()
-        full_fixed.append(last_item)
-        return full_fixed == itemset
 
     def get_candidate_count(self):
         return self.population
