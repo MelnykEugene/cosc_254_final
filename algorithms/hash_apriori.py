@@ -4,7 +4,7 @@ from item_set import ItemSet
 from hash_tree import HashTree
 import timeit
 
-dataset = '/Users/yevhenmelnyk/Desktop/data_mining/mining_final/datasets/T40I10D100k.dat'
+dataset = '/Users/yevhenmelnyk/Desktop/data_mining/mining_final/datasets/T10I4D100k.dat'
 print('dataset: ' + dataset)
 output = './output/apriori/' + sys.argv[1]
 minsup = float(sys.argv[2])  # absolute
@@ -13,7 +13,7 @@ data_size = int(sys.argv[3])
 branch_factor = None
 
 
-def hash_apriori():
+def hash_apriori(verbose=False):
     # in-memory transaction storage
     transactions = []
 
@@ -29,10 +29,10 @@ def hash_apriori():
                 if item > max_item: max_item = item
                 items_support[item] += 1
 
-    print('read transactions into memory')
+    if verbose: print('read transactions into memory')
     global branch_factor
     branch_factor=max_item
-    print('branch factor set to ' + str(branch_factor))
+    if verbose: print('branch factor set to ' + str(branch_factor))
 
     print()
     frequent_items = [x for x in items_support.keys() if items_support[x] >= minsup]
@@ -40,7 +40,7 @@ def hash_apriori():
         return []
     else:
         frequent_items.sort()
-    print('obtained ' + str(len(frequent_items)) + ' frequent items')
+    if verbose: print('obtained ' + str(len(frequent_items)) + ' frequent items')
 
     frequent_itemsets = [(x, items_support[x]) for x in frequent_items]
 
@@ -48,15 +48,15 @@ def hash_apriori():
     frequent_tree_k = frequent_items
     # generate candidates of length k+1
     while True:
-        print('mining candidate tree for k = ' + str(k + 1))
+        if verbose: print('mining candidate tree for k = ' + str(k + 1))
         if k == 1:
             candidates_tree_kp1 = get_candidates_2(frequent_tree_k, verbose=False)
         else:
             candidates_tree_kp1 = get_candidates_kp1(frequent_tree_k, verbose=False)
 
         if candidates_tree_kp1.get_candidate_count() == 0:
-            print('found no new candidates at k = ' + str(k + 1))
-            print('finished')
+            if verbose: print('found no new candidates at k = ' + str(k + 1))
+            if verbose: print('finished')
             break
 
         # print leaves debug
@@ -72,16 +72,16 @@ def hash_apriori():
         #     if next is not None:
         #         print(next)
 
-        print('obtained ' + str(
+        if verbose: print('obtained ' + str(
             candidates_tree_kp1.get_candidate_count()) + ' candidates in candidate hashtree for k = ' + str(k + 1))
 
-        print('calculating supports...')
+        if verbose: print('calculating supports...')
         # calculate supports for the new candidate tree
         for transaction in transactions:
             if len(transaction) >= k + 1:
                 candidates_tree_kp1.update_supports(transaction)
 
-        print('filtering candidate hashtree...')
+        if verbose: print('filtering candidate hashtree...')
 
         # validate support, save frequents, remove infrequents
         node = candidates_tree_kp1.last_leaf
@@ -97,14 +97,14 @@ def hash_apriori():
                     candidates_tree_kp1.population -= 1
             node = node.next_leaf
 
-        print(str(candidates_tree_kp1.get_candidate_count()) + ' candidates are frequent')
-        print()
+        if verbose: print(str(candidates_tree_kp1.get_candidate_count()) + ' candidates are frequent')
+        if verbose: print()
         # move to the next iteration using current successful candidates to generate k+2
         k += 1
         frequent_tree_k = candidates_tree_kp1
 
         if frequent_tree_k.get_candidate_count() == 0:
-            print('finished')
+            if verbose: print('finished')
             break
 
     return frequent_itemsets
@@ -166,9 +166,11 @@ def check_frequency_of_all_immediate_subsets(candidate_kp1, hash_tree_k):
 from apriori import apriori
 #aprioris = apriori()
 #hashes=hash_apriori()
-
-print('apriori took: ' + str(timeit.timeit(apriori,number=1)))
-print('=========================================================')
 print('hashapriori took: '+str(timeit.timeit(hash_apriori,number=1)))
+print(hash_apriori())
+print('=========================================================')
+print('apriori took: ' + str(timeit.timeit(apriori,number=1)))
 
-#print([x for x in aprioris if x not in hashes] + [x for x in hashes if x not in aprioris])
+#aprioris=apriori()
+#hashes=hash_apriori()
+#print('difference in output: '+str([x for x in aprioris if x not in hashes] + [x for x in hashes if x not in aprioris]))

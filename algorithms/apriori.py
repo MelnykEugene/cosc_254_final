@@ -3,13 +3,13 @@ import collections
 import math
 from item_set import ItemSet
 
-dataset = '/Users/yevhenmelnyk/Desktop/data_mining/mining_final/datasets/T40I10D100k.dat'
+dataset = '/Users/yevhenmelnyk/Desktop/data_mining/mining_final/datasets/T10I4D100k.dat'
 output = './output/apriori/' + sys.argv[1]
 minsup = float(sys.argv[2])  # absolute
 data_size = int(sys.argv[3])
 
 
-def apriori():
+def apriori(verbose=False):
     # in-memory transaction storage
     transactions = []
 
@@ -22,14 +22,14 @@ def apriori():
             transactions.append(transaction)
             for item in transaction:
                 items_support[item] += 1
-    print('read transactions into memory')
+    if verbose: print('read transactions into memory')
 
     frequent_items = [x for x in items_support.keys() if items_support[x] >= minsup]
     if not frequent_items:
         return []
     else:
         frequent_items.sort()
-    print('obtained ' + str(len(frequent_items)) + ' frequent items')
+    if verbose: print('obtained ' + str(len(frequent_items)) + ' frequent items')
 
     # add frequent items to the resulting collection of frequent itemsets
     frequent_itemsets = [(x, items_support[x]) for x in frequent_items]
@@ -44,12 +44,12 @@ def apriori():
         else:
             # pruning happens here
             candidates = get_candidates_kp1(frequentsK, k )
-        print('obtained ' + str(len(candidates)) + ' candidates of length ' + str(k + 1))
+        if verbose: print('obtained ' + str(len(candidates)) + ' candidates of length ' + str(k + 1))
         k += 1
         # only keep those who are frequent
         frequentsK = [candidate for candidate in candidates if check_candidate_support(candidate, transactions)]
-        print('of which ' + str(len(frequentsK)) + ' are frequent')
-        print()
+        if verbose: print('of which ' + str(len(frequentsK)) + ' are frequent')
+        if verbose: print()
         # save into the results list
         for itemset in frequentsK:
             frequent_itemsets.append((itemset.itemset, itemset.support))
