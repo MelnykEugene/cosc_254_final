@@ -53,24 +53,11 @@ def hash_apriori(verbose=False):
             candidates_tree_kp1 = get_candidates_2(frequent_tree_k, verbose=False)
         else:
             candidates_tree_kp1 = get_candidates_kp1(frequent_tree_k, verbose=False)
-
+        
         if candidates_tree_kp1.get_candidate_count() == 0:
             if verbose: print('found no new candidates at k = ' + str(k + 1))
             if verbose: print('finished')
             break
-
-        # print leaves debug
-        # node = candidates_tree_kp1.last_leaf
-        # while node is not None:
-        #     print('leaf has itemsets '+str([(itemset.itemset,itemset.support) for itemset in node.itemsets]))
-        #     node=node.next_leaf
-
-        # print first level interior debug
-        # node = candidates_tree_kp1.root
-        # for i in range(len(node.childs)):
-        #     next=node.childs[i]
-        #     if next is not None:
-        #         print(next)
 
         if verbose: print('obtained ' + str(
             candidates_tree_kp1.get_candidate_count()) + ' candidates in candidate hashtree for k = ' + str(k + 1))
@@ -89,6 +76,7 @@ def hash_apriori(verbose=False):
             # we are going to go through a list and remove items from it
             # to avoid problems with iteration of a mutating list, we instead iterate through a copy
             itemsets_to_iterate = node.itemsets.copy()
+
             for itemset in itemsets_to_iterate:
                 if itemset.support >= minsup:
                     frequent_itemsets.append((itemset.itemset, itemset.support))
@@ -99,6 +87,7 @@ def hash_apriori(verbose=False):
 
         if verbose: print(str(candidates_tree_kp1.get_candidate_count()) + ' candidates are frequent')
         if verbose: print()
+
         # move to the next iteration using current successful candidates to generate k+2
         k += 1
         frequent_tree_k = candidates_tree_kp1
@@ -110,7 +99,7 @@ def hash_apriori(verbose=False):
     return frequent_itemsets
 
 
-# generates candidates of length 2
+# generates candidates of length 2 in simple way
 def get_candidates_2(frequent_items, verbose=False):
     candidate_tree = HashTree(2, branch_factor)
     for i in range(len(frequent_items)):
@@ -126,13 +115,14 @@ def get_candidates_kp1(hashtree_k, verbose=False):
     k = hashtree_k.itemset_size
     candidate_hashtree_kp1 = HashTree(k + 1, branch_factor)
 
+    #follow the leaf nodes and join itemsets within the same leaf
     node = hashtree_k.last_leaf
     while node is not None:
         for i in range(len(node.itemsets)):
             itemset1 = node.itemsets[i]
             for j in range(i + 1, len(node.itemsets)):
                 itemset2 = node.itemsets[j]
-                # don't forget to remove this line in prod
+
                 # assert (itemset1.itemset[:-1] == itemset2.itemset[:-1])
                 # assert len(itemset1.itemset) == k
                 # if we have the right order, join to get new candidate
@@ -142,10 +132,12 @@ def get_candidates_kp1(hashtree_k, verbose=False):
                     candidate.append(itemset2.itemset[-1])
                 else:
                     continue
+                
                 if check_frequency_of_all_immediate_subsets(candidate, hashtree_k):
                     candidate_hashtree_kp1.insert_candidate(ItemSet(candidate), verbose)
 
         node = node.next_leaf
+        
     return candidate_hashtree_kp1
 
 

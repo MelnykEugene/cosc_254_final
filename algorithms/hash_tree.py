@@ -1,3 +1,5 @@
+#leaf nodes of the tree store the itemsets
+#we also keep them in a linked list for easy access
 class LeafNode:
     itemsets = None
     next_leaf = None
@@ -5,7 +7,7 @@ class LeafNode:
     def __init__(self):
         self.itemsets = []
 
-
+#interior nodes of the tree serve as hashtables that route the traversal of the tree based on the hash of the current item
 class InteriorNode:
     childs = None
 
@@ -14,12 +16,14 @@ class InteriorNode:
 
 
 class HashTree:
-    # branching factor - roughly the degree of interior nodes; should be of the order of |I|
-    # root node will have level=0
-    h = 119
+    # branching factor
+    h = None
+
+    #the tree has to know the itemset size, which determines its depth
     itemset_size = 0
     population = 0
     root = None
+    #counting leaf nodes for debug
     leaf_nodes = 0
 
     # for convenience, we chain all of the leaf nodes in a reverse linked list. this is a reference to the last link
@@ -37,14 +41,18 @@ class HashTree:
         self.population += 1
 
     # recursive search for the right place to insert
-    # I do not store the itemsets within leaves in sorted order contrary to the book. Not sure why we may need that
-    # actually i do but don't know how
+    # k = current level in three
+    # current_node = the starting node for a given branch of recursion
     def insert(self, current_node, itemset, k, verbose):
-        # the hash function is just modulo branching factor
+
+        #if leaf node has been reached, we insert the itemset here
         if isinstance(current_node, LeafNode):
             if verbose: print('inserting ' + str(itemset) + ' into leaf with ' + str(current_node.itemsets))
             current_node.itemsets.append(itemset)
+        
+        #else we need to search further
         else:
+            #the "hash function" is the identity
             direction = itemset.itemset[k] % self.h
             next_node = current_node.childs[direction]
             # if next node doesn't exist, we either make it interior or leaf depending on current depth k
@@ -66,13 +74,10 @@ class HashTree:
             # if the next node does exist (or was just created), simply advance the recursion
             self.insert(next_node, itemset, k + 1, verbose)
 
-    # itemset here is ONLY an item array
-    # no need for recusion, the hashtree can be be searched iteratively
+    #tells whether the candidate is in the hashtree. 
     def lookup(self, candidate):
         k = 0
-        # print('looking up '+ str(itemset) +' in the previous frequent hashtree')
         current_node = self.root
-
         # for the itemset to be in the tree, there must be a path of length exactly len(itemset)
         # that ends in a leaf node containing the itemset
         while k < len(candidate) - 1:
@@ -82,13 +87,15 @@ class HashTree:
                 return False
             current_node = next_node
             k += 1
+
         # assert isinstance(current_node,LeafNode)
         # all of the items in a leaf share all the items except for the last.
-        # therefore we can search for our candidate based on the last item
+        # therefore we can search for our candidate based on the last item only and leverage binary search
         leaf_itemsets_last_items = [x.itemset[-1] for x in current_node.itemsets]
         return candidate[-1] in leaf_itemsets_last_items
 
-    # entry-point
+    # given a transaction, increases the support of all itemsets in the tree contained in the transcation
+    # entry-point for recursion
     def update_supports(self, transaction):
         self.update(self.root, transaction, 0, list())
 
@@ -121,6 +128,7 @@ class HashTree:
                     for itemset in next_node.itemsets:
                         if new_new_fixed==itemset.itemset:
                             itemset.inc_support()
+
 
     def get_candidate_count(self):
         return self.population
