@@ -3,7 +3,7 @@ import collections
 import math
 from item_set import ItemSet
 
-dataset = './datasets/' + sys.argv[1]
+dataset = '/Users/yevhenmelnyk/Desktop/data_mining/mining_final/datasets/mushroom.dat'
 print(dataset)
 output = './output/apriori/' + sys.argv[1]
 minsup = float(sys.argv[2])  # absolute
@@ -32,7 +32,10 @@ def apriori():
         frequent_items.sort()
     print('obtained ' + str(len(frequent_items)) + ' frequent items')
 
+    # add frequent items to the resulting collection of frequent itemsets
     frequent_itemsets = [(x, items_support[x]) for x in frequent_items]
+
+    # ----------------------------------------------------------------------
     k = 1
     frequentsK = frequent_items
     # generate k+1 itemsets
@@ -40,6 +43,7 @@ def apriori():
         if k == 1:
             candidates = get_candidates_2(frequentsK)
         else:
+            # pruning happens here
             candidates = get_candidates_kp1(frequentsK, k + 1)
         print('obtained ' + str(len(candidates)) + ' candidates of length ' + str(k + 1))
         k += 1
@@ -112,7 +116,7 @@ def check_candidate_support(candidate, transactions):
     k = len(candidate.itemset)
     supp = 0
     for transaction in transactions:
-        if len(transaction)<len(candidate.itemset):
+        if len(transaction) < len(candidate.itemset):
             continue
         if set(candidate.itemset) <= set(transaction):
             supp += 1
