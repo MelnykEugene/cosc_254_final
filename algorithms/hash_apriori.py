@@ -137,7 +137,7 @@ def get_candidates_kp1(hashtree_k, verbose=False):
                     candidate_hashtree_kp1.insert_candidate(ItemSet(candidate), verbose)
 
         node = node.next_leaf
-        
+
     return candidate_hashtree_kp1
 
 
@@ -158,6 +158,8 @@ def check_frequency_of_all_immediate_subsets(candidate_kp1, hash_tree_k):
 from apriori import apriori
 #aprioris = apriori()
 #hashes=hash_apriori()
+
+#t10i4d100k with minsup = 1000 shows a performance improvement of 90x. takes about 1h to run
 print('hashapriori took: '+str(timeit.timeit(hash_apriori,number=1)))
 print(hash_apriori())
 print('=========================================================')

@@ -56,7 +56,7 @@ class HashTree:
             direction = itemset.itemset[k] % self.h
             next_node = current_node.childs[direction]
             # if next node doesn't exist, we either make it interior or leaf depending on current depth k
-            if next_node is None:
+            if next_node is None: 
                 if k == (len(itemset.itemset) - 2):  # if this is true then the next node must be a leaf
                     next_node = LeafNode()
                     self.leaf_nodes += 1
