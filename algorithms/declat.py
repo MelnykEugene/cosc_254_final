@@ -57,9 +57,9 @@ for x in DataStructure:
             count+=1
             continue
         #finding the union of the two sets
-        tempSet = DataStructure[x].union(DataStructure[y])
+        tempSet = DataStructure[x].intersection(DataStructure[y])
         #if the support is larger than the min sup
-        if(len(tempSet)>minsup):
+        if(len(tempSet)>=minsup):
             #it is frequent and we add to the frequent dictionary
             DataStructureLoop[x + " " + y] = tempSet
     #incrementing logic counter
