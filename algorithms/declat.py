@@ -61,6 +61,9 @@ for x in DataStructure:
         #if the support is larger than the min sup
         if(len(tempSet)>=minsup):
             #it is frequent and we add to the frequent dictionary
+            a = {x}
+            b = {y}
+            a.union(b)
             DataStructureLoop[x + " " + y] = tempSet
     #incrementing logic counter
     index += 1
