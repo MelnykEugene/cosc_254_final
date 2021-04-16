@@ -14,10 +14,11 @@
 
 if __name__ == '__main__':
     print("declat")
-
+from collections import OrderedDict
 import sys
-DataStructure = {}
-DataStructureLoop = {}
+#A Dictionary to hold the
+DataStructure = OrderedDict()
+DataStructureLoop = OrderedDict()
 TransactionCount = 0;
 minsup = 2
 with open("datasets/input.dat", "rt") as file:
@@ -42,4 +43,5 @@ for x in DataStructure:
         tempSet = DataStructure[x].union(DataStructure[y])
         if(len(tempSet)>minsup):
             DataStructureLoop[x + " " + y] = tempSet
+    index += 1
 print(DataStructureLoop)
