@@ -1,65 +1,72 @@
-# Change from a horiz to a vertical
-#
-#
-# dEclat(a set of class members for a subtree rooted at P)
-# For loop for an itemset i in P
-# Nested For loop for another itemset j (with j > i)in P
-# Set R is equal to the union of both itemsets
-# Compute the diffset of R by subtracting the diffset of j from the diffset of i
-# If the support of R is greater than or equal to the min support threshold
-# 	Transaction dataset of i is equal to the union of the transaction dataset (initially
-# empty) and R
-# For every transaction dataset of i that isn’t empty, do dEclat(transaction dataset of i)
+#Not optimized eclat - still need to optimize by doing prefixes
 
+#import statements
 from collections import OrderedDict
+import timeit
+import sys
 
+#global variables
+# a dictionary to hold the all the frequent itemsets
 FinalDataStructure = OrderedDict()
+# the minimum support to compare against, as a number of transactions
+minsup = int(sys.argv[1])
 
+#wrapper for time analysis
+def wrapper(func, *args, **kwargs):
+    def wrapped():
+        return func(*args, **kwargs)
+    return wrapped
+
+#a function that converts a horizontal dataset to a vertical, as well as finding the frequent items of k = 1
 def setup():
     # A Dictionary to hold the Vertical data set
-    DataStructure = OrderedDict()
+    VertDataSet = OrderedDict()
+    # A Dictionary to hold the frequent items of k = 1
     FrequentItems = OrderedDict()
     # Counter for transactions
-    TransactionCount = 0;
-    minsup = 7000
-    with open("datasets/mushroom.dat", "rt") as file:
+    TransactionCount = 0
+    # Reading in the dataset of interest
+    with open("datasets/T10I4D100K.dat", "rt") as file:
         # For each transaction
         for transaction in file:
             # Increment Transaction count
-            TransactionCount += 1;
+            TransactionCount += 1
             # for each item in the transaction
             x = transaction.split()
             for item in x:
                 # if it already exists in the dictionary, add the transaction number to the existing set
-                if item in DataStructure:
-                    DataStructure[item].add(TransactionCount)
+                if item in VertDataSet:
+                    VertDataSet[item].add(TransactionCount)
                 # if it doesn't, make a new set with the current transaction number
                 else:
-                    DataStructure[item] = {TransactionCount}
-    # printing the vertical dataset
-    for x in DataStructure:
+                    VertDataSet[item] = {TransactionCount}
+    # for every itemset in the vertical dataset
+    for x in VertDataSet:
         # print(x +  " ", DataStructure[x])
-        if len(DataStructure[x]) >= minsup:
-            FrequentItems[x] = DataStructure.get(x)
-            FinalDataStructure[x] = DataStructure.get(x)
+        # if the support is greater than the minimum support
+        if len(VertDataSet[x]) >= minsup:
+            # Add the item to the frequent items dictionary
+            FrequentItems[x] = VertDataSet.get(x)
+            # add the item to the global frequent items dictionary
+            FinalDataStructure[x] = VertDataSet.get(x)
     # print(FrequentItems)
+    # return the frequent item dictionary
     return FrequentItems
-def eclat(DataStructure):
-    # temporary minimum support
-    minsup = 7000
-    # avoid duplicates logic counter
-    index = 0;
 
-    DataStructureLoop = OrderedDict()
-    # for the an item in the dataset
-    # print(DataStructure)
-    for x in DataStructure:
+# Eclat function: finds frequent itemsets of k > 1
+def eclat(FrequentItemsPrevious):
+    # temporary minimum support
+    # avoid duplicates logic counter
+    index = 0
+    # Dictionary for frequent items at the current level of k
+    FrequentItemsCurrent = OrderedDict()
+    # for an itemset in the previous level of frequent items
+    for x in FrequentItemsPrevious:
         # print("x",x)
         # avoid duplicates logic counter
         count = 0
-        # for another item in the dataset
-        for y in DataStructure:
-            # print("y" ,y)
+        # for another itemset in the previous level of frequent items
+        for y in FrequentItemsPrevious:
             # looking for the index to target - y>x
             targetIndex = index + 1
             # if we aren't at the right index, continue
@@ -67,34 +74,60 @@ def eclat(DataStructure):
                 count += 1
                 continue
             # finding the union of the two sets
-            tempSet = DataStructure[x].intersection(DataStructure[y])
-            # print(tempSet)
+            CandidateSet = FrequentItemsPrevious[x].intersection(FrequentItemsPrevious[y])
             # if the support is larger than the min sup
-            if (len(tempSet) >= minsup):
-                # it is frequent and we add to the frequent dictionary
+            if (len(CandidateSet) >= minsup):
+                # String logic to calculate the new key
+                # Creating two empty sets
                 a = set()
                 b = set()
+                # Looping through an itemset string to get each individual item
                 for it in x.split(" "):
+                    # Adding each individual item to a, making a an itemset (SAME AS X, BUT IN ITEMSET INSTEAD OF STRING)
                     a.add(it)
                 for it in y.split(" "):
+                    # Adding each individual item to b, making b an itemset (SAME AS Y, BUT IN ITEMSET INSTEAD OF STRING)
                     b.add(it)
+                # Combining the two itemsets into one
                 c = b.union(a)
+                # making a blank list to store the next itemset's string
                 nextStr = []
+                # for every item in itemset c
                 for it2 in c:
+                    #add it to the list
                     nextStr.append(it2)
+                #Sorting it alphabetically
                 nextStr.sort()
+                #Creating the next string
                 nextStr2 = ""
+                # Looping through the list to get each item, add it to string to create itemset
                 for it3 in nextStr:
                     nextStr2 += it3
                     nextStr2 += " "
-                DataStructureLoop[nextStr2[:-1]] = tempSet
-                FinalDataStructure[nextStr2[:-1]] = tempSet
+                # It is frequent and we add the itemset (minus the weird space at the end) to the current level's dictionary
+                FrequentItemsCurrent[nextStr2[:-1]] = CandidateSet
+                # We also add the itemset (minus the weird space at the end) to the global frequent itemset dictionary
+                FinalDataStructure[nextStr2[:-1]] = CandidateSet
         # incrementing logic counter
         index += 1
-    # print(DataStructureLoop)
-    if len(DataStructureLoop) > 0:
-        eclat(DataStructureLoop)
+    # if there are still frequent items at this level
+    if len(FrequentItemsCurrent) > 0:
+        # Recursively call it with the frequent itemsets at the current level
+        eclat(FrequentItemsCurrent)
 if __name__ == '__main__':
-    print("declat")
-    eclat(setup())
-    print(FinalDataStructure.keys())
+    #Just saying what algo we're running
+    print("eclat")
+    # Getting the frequent itemsets of size 1 in a vertical format
+    FI = setup()
+    # running eclat in a time wrapper
+    wrappedeclat = wrapper(eclat,FI)
+    # getting the runtime
+    time_eclat = timeit.timeit(wrappedeclat, number=1)*1000
+    #printing the runtime in different units
+    print("milliseconds",time_eclat)
+    print("seconds",time_eclat/1000)
+    print("minutes",time_eclat/60000)
+    # printing the final frequent itemsets
+    print("itemsets",FinalDataStructure.keys())
+    # printing the final number of frequent itemsets
+    print("number of itemsets",len(FinalDataStructure))
