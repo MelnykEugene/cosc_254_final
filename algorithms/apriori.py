@@ -3,11 +3,10 @@ import collections
 import math
 from item_set import ItemSet
 
-dataset = '/Users/yevhenmelnyk/Desktop/data_mining/mining_final/datasets/T10I4D100k.dat'
-output = './output/apriori/' + sys.argv[1]
+dataset = 'datasets/mushroom.dat'
+output =  sys.argv[1]
 minsup = float(sys.argv[2])  # absolute
 data_size = int(sys.argv[3]) #not needed for apriori/hashapriori
-
 
 def apriori(verbose=False):
     # in-memory transaction storage
@@ -122,3 +121,4 @@ def check_candidate_support(candidate, transactions):
         return True
     else:
         return False
+# if __name__ == '__main__':

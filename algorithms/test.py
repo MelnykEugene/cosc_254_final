@@ -1,7 +1,7 @@
 # just a file to test some logic
 if __name__ == '__main__':
-    x = "1"
-    y = "2"
+    x = "34"
+    y = "85"
     a = set()
     b = set()
     for it in x.split(" "):
@@ -12,7 +12,9 @@ if __name__ == '__main__':
     print(c)
     nextStr = []
     for x in c:
-        nextStr += x
+        print(x)
+        nextStr.append(x)
+        print("nextstr",nextStr)
     nextStr.sort()
     nextStr2 = ""
     for x in nextStr:
