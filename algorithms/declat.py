@@ -61,10 +61,22 @@ for x in DataStructure:
         #if the support is larger than the min sup
         if(len(tempSet)>=minsup):
             #it is frequent and we add to the frequent dictionary
-            a = {x}
-            b = {y}
-            a.union(b)
-            DataStructureLoop[x + " " + y] = tempSet
+            a = set()
+            b = set()
+            for it in x.split(" "):
+                a.add(it)
+            for it in y.split(" "):
+                b.add(it)
+            c = b.union(a)
+            nextStr = []
+            for x in c:
+                nextStr += x
+            nextStr.sort()
+            nextStr2 = ""
+            for x in nextStr:
+                nextStr2 += x
+                nextStr2 += " "
+            DataStructureLoop[nextStr2[:-1]] = tempSet
     #incrementing logic counter
     index += 1
 #printing frequent items of k = 2
