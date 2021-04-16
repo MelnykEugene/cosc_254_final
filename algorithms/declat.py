@@ -13,12 +13,15 @@
 
 from collections import OrderedDict
 
+FinalDataStructure = OrderedDict()
 
 def setup():
     # A Dictionary to hold the Vertical data set
     DataStructure = OrderedDict()
+    FrequentItems = OrderedDict()
     # Counter for transactions
     TransactionCount = 0;
+    minsup = 7000
     with open("datasets/mushroom.dat", "rt") as file:
         # For each transaction
         for transaction in file:
@@ -26,7 +29,6 @@ def setup():
             TransactionCount += 1;
             # for each item in the transaction
             x = transaction.split()
-            x.pop()
             for item in x:
                 # if it already exists in the dictionary, add the transaction number to the existing set
                 if item in DataStructure:
@@ -35,7 +37,13 @@ def setup():
                 else:
                     DataStructure[item] = {TransactionCount}
     # printing the vertical dataset
-    return DataStructure
+    for x in DataStructure:
+        # print(x +  " ", DataStructure[x])
+        if len(DataStructure[x]) >= minsup:
+            FrequentItems[x] = DataStructure.get(x)
+            FinalDataStructure[x] = DataStructure.get(x)
+    # print(FrequentItems)
+    return FrequentItems
 def eclat(DataStructure):
     # temporary minimum support
     minsup = 7000
@@ -44,11 +52,14 @@ def eclat(DataStructure):
 
     DataStructureLoop = OrderedDict()
     # for the an item in the dataset
+    # print(DataStructure)
     for x in DataStructure:
+        # print("x",x)
         # avoid duplicates logic counter
         count = 0
         # for another item in the dataset
         for y in DataStructure:
+            # print("y" ,y)
             # looking for the index to target - y>x
             targetIndex = index + 1
             # if we aren't at the right index, continue
@@ -57,6 +68,7 @@ def eclat(DataStructure):
                 continue
             # finding the union of the two sets
             tempSet = DataStructure[x].intersection(DataStructure[y])
+            # print(tempSet)
             # if the support is larger than the min sup
             if (len(tempSet) >= minsup):
                 # it is frequent and we add to the frequent dictionary
@@ -68,19 +80,21 @@ def eclat(DataStructure):
                     b.add(it)
                 c = b.union(a)
                 nextStr = []
-                for x in c:
-                    nextStr += x
+                for it2 in c:
+                    nextStr += it2
                 nextStr.sort()
                 nextStr2 = ""
-                for x in nextStr:
-                    nextStr2 += x
+                for it3 in nextStr:
+                    nextStr2 += it3
                     nextStr2 += " "
                 DataStructureLoop[nextStr2[:-1]] = tempSet
+                FinalDataStructure[nextStr2[:-1]] = tempSet
         # incrementing logic counter
         index += 1
-    print(DataStructureLoop.keys())
+    # print(DataStructureLoop)
     if len(DataStructureLoop) > 0:
         eclat(DataStructureLoop)
 if __name__ == '__main__':
     print("declat")
     eclat(setup())
+    print(FinalDataStructure.keys())
