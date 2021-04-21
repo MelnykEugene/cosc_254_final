@@ -1,3 +1,4 @@
+import tracemalloc
 from collections import OrderedDict
 import timeit
 import sys
@@ -88,8 +89,15 @@ def wrapper(func, *args, **kwargs):
     return wrapped
 
 if __name__ == '__main__':
+    print("dEclat")
+    tracemalloc.start()
     into = vertical_layout(filename)
     wrappedE = wrapper(dEclat, into)
     time_eclat = timeit.timeit(wrappedE, number=1)*1000
     print("number of freq itemsets: ",len(diffSets))
     print("time in millisecond",time_eclat)
+    print("time in second",time_eclat/1000)
+    print("time in min",time_eclat/60000)
+    current, peak = tracemalloc.get_traced_memory()
+    print(f"Current memory usage is {current / 10 ** 6}MB; Peak was {peak / 10 ** 6}MB")
+    tracemalloc.stop()

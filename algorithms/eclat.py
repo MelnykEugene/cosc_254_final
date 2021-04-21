@@ -4,6 +4,7 @@
 from collections import OrderedDict
 import timeit
 import sys
+import tracemalloc
 
 #global variables
 # a dictionary to hold the all the frequent itemsets
@@ -26,7 +27,7 @@ def setup():
     # Counter for transactions
     TransactionCount = 0
     # Reading in the dataset of interest
-    with open("datasets/T10I4D100K.dat", "rt") as file:
+    with open("datasets/mushroom.dat", "rt") as file:
         # For each transaction
         for transaction in file:
             # Increment Transaction count
@@ -117,6 +118,7 @@ def eclat(FrequentItemsPrevious):
 if __name__ == '__main__':
     #Just saying what algo we're running
     print("eclat")
+    tracemalloc.start()
     # Getting the frequent itemsets of size 1 in a vertical format
     FI = setup()
     # running eclat in a time wrapper
@@ -131,3 +133,6 @@ if __name__ == '__main__':
     print("itemsets",FinalDataStructure.keys())
     # printing the final number of frequent itemsets
     print("number of itemsets",len(FinalDataStructure))
+    current, peak = tracemalloc.get_traced_memory()
+    print(f"Current memory usage is {current / 10 ** 6}MB; Peak was {peak / 10 ** 6}MB")
+    tracemalloc.stop()

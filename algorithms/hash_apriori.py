@@ -3,10 +3,11 @@ import collections
 from item_set import ItemSet
 from hash_tree import HashTree
 import timeit
+import tracemalloc
 
-dataset = '/Users/yevhenmelnyk/Desktop/data_mining/mining_final/datasets/T10I4D100k.dat'
-print('dataset: ' + dataset)
-output = './output/apriori/' + sys.argv[1]
+tracemalloc.start()
+dataset = 'datasets/mushroom.dat'
+output = '/output/apriori/' + sys.argv[1]
 minsup = float(sys.argv[2])  # absolute
 print('minsup: ' + str(minsup))
 data_size = int(sys.argv[3])
@@ -95,7 +96,7 @@ def hash_apriori(verbose=False):
         if frequent_tree_k.get_candidate_count() == 0:
             if verbose: print('finished')
             break
-
+    print(len(frequent_itemsets))
     return frequent_itemsets
 
 
@@ -161,9 +162,12 @@ from apriori import apriori
 
 #t10i4d100k with minsup = 1000 shows a performance improvement of 90x. takes about 1h to run
 print('hashapriori took: '+str(timeit.timeit(hash_apriori,number=1)))
-print(hash_apriori())
+current, peak = tracemalloc.get_traced_memory()
+print(f"Current memory usage is {current / 10 ** 6}MB; Peak was {peak / 10 ** 6}MB")
+tracemalloc.stop()
+# print(hash_apriori())
 print('=========================================================')
-print('apriori took: ' + str(timeit.timeit(apriori,number=1)))
+# print('apriori took: ' + str(timeit.timeit(apriori,number=1)))
 
 #aprioris=apriori()
 #hashes=hash_apriori()
