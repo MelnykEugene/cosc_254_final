@@ -5,7 +5,7 @@ from item_set import ItemSet
 import tracemalloc
 import timeit
 
-dataset = 'datasets/T10I4D100K.dat'
+dataset = 'datasets/mushroom.dat'
 output =  sys.argv[1]
 minsup = float(sys.argv[2])  # absolute
 data_size = int(sys.argv[3]) #not needed for apriori/hashapriori
