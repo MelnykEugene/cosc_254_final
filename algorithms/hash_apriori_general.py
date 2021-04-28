@@ -1,7 +1,7 @@
 import sys
 import collections
 from item_set import ItemSet
-from hash_tree import HashTree
+from hash_tree_general import HashTree
 import timeit
 import tracemalloc
 
@@ -10,10 +10,10 @@ dataset = 'datasets/mushroom.dat'
 print('dataset:' + dataset)
 minsup = float(sys.argv[1])  # absolute
 print('minsup: ' + str(minsup))
-branch_factor = None
+branch_fraction = float(sys.argv[2])
+print('branch fraction: ' +str(branch_fraction))
 
-
-def hash_apriori(verbose=True):
+def hash_apriori(branch_fraction,verbose=True):
     # in-memory transaction storage
     transactions = []
 
@@ -30,9 +30,11 @@ def hash_apriori(verbose=True):
                 items_support[item] += 1
 
     if verbose: print('read transactions into memory')
-    global branch_factor
-    branch_factor=max_item
-    if verbose: print('branch factor set to ' + str(branch_factor))
+    branch_factor = int(max_item*branch_fraction)
+
+    if verbose: 
+        print('branch fraction: ' + str(branch_fraction))
+        print('branch factor set to ' + str(branch_factor))
 
     print()
     frequent_items = [x for x in items_support.keys() if items_support[x] >= minsup]
@@ -50,9 +52,9 @@ def hash_apriori(verbose=True):
     while True:
         if verbose: print('mining candidate tree for k = ' + str(k + 1))
         if k == 1:
-            candidates_tree_kp1 = get_candidates_2(frequent_tree_k, verbose=False)
+            candidates_tree_kp1 = get_candidates_2(frequent_tree_k, branch_factor,verbose=False)
         else:
-            candidates_tree_kp1 = get_candidates_kp1(frequent_tree_k, verbose=False)
+            candidates_tree_kp1 = get_candidates_kp1(frequent_tree_k, branch_factor,verbose=False)
         
         if candidates_tree_kp1.get_candidate_count() == 0:
             if verbose: print('found no new candidates at k = ' + str(k + 1))
@@ -100,7 +102,7 @@ def hash_apriori(verbose=True):
 
 
 # generates candidates of length 2 in simple way
-def get_candidates_2(frequent_items, verbose=False):
+def get_candidates_2(frequent_items,branch_factor,verbose=False):
     candidate_tree = HashTree(2, branch_factor)
     for i in range(len(frequent_items)):
         for j in range(i + 1, len(frequent_items)):
@@ -111,32 +113,30 @@ def get_candidates_2(frequent_items, verbose=False):
 # generates candidates of length k+1
 # using the union of candidates of length k that share first k-1 items (like normal apriori)
 # leveraging lexicographic order and the fact that candidates sharing the first k-1 items live in the same leaf
-def get_candidates_kp1(hashtree_k, verbose=False):
+def get_candidates_kp1(hashtree_k,branch_factor,verbose=False):
     k = hashtree_k.itemset_size
     candidate_hashtree_kp1 = HashTree(k + 1, branch_factor)
 
-    #follow the leaf nodes and join itemsets within the same leaf
     node = hashtree_k.last_leaf
+    prev_frequents=[]
+
     while node is not None:
-        for i in range(len(node.itemsets)):
-            itemset1 = node.itemsets[i]
-            for j in range(i + 1, len(node.itemsets)):
-                itemset2 = node.itemsets[j]
-
-                # assert (itemset1.itemset[:-1] == itemset2.itemset[:-1])
-                # assert len(itemset1.itemset) == k
-                # if we have the right order, join to get new candidate
-                if itemset1.itemset[-1] < itemset2.itemset[-1]:
-                    candidate = []
-                    candidate.extend(itemset1.itemset)
-                    candidate.append(itemset2.itemset[-1])
-                else:
-                    continue
-                
-                if check_frequency_of_all_immediate_subsets(candidate, hashtree_k):
-                    candidate_hashtree_kp1.insert_candidate(ItemSet(candidate), verbose)
-
+        prev_frequents.extend(node.itemsets)
         node = node.next_leaf
+    
+    for i in range(len(prev_frequents)):
+        itemset1 = prev_frequents[i]
+        for j in range(i + 1, len(prev_frequents)):
+            itemset2 = prev_frequents[j]
+            if itemset1.itemset[:-1]==itemset2.itemset[:-1] and itemset1.itemset[-1] < itemset2.itemset[-1]:
+                candidate = []
+                candidate.extend(itemset1.itemset)
+                candidate.append(itemset2.itemset[-1])
+            else:
+                continue
+                
+            if check_frequency_of_all_immediate_subsets(candidate, hashtree_k):
+                candidate_hashtree_kp1.insert_candidate(ItemSet(candidate), verbose)
 
     return candidate_hashtree_kp1
 
@@ -157,15 +157,20 @@ def check_frequency_of_all_immediate_subsets(candidate_kp1, hash_tree_k):
 
 #aprioris = apriori()
 #hashes=hash_apriori()
+def wrapper(func, *args, **kwargs):
+    def wrapped():
+        return func(*args, **kwargs)
+    return wrapped
+
+wrapped = wrapper(hash_apriori,branch_fraction)
 
 #t10i4d100k with minsup = 1000 shows a performance improvement of 90x. takes about 1h to run
-print('hashapriori took: '+str(timeit.timeit(hash_apriori,number=1)))
+print('hashapriori took: '+str(timeit.timeit(wrapped,number=1)))
 current, peak = tracemalloc.get_traced_memory()
 print(f"Current memory usage is {current / 10 ** 6}MB; Peak was {peak / 10 ** 6}MB")
 tracemalloc.stop()
 # print(hash_apriori())
 print('=========================================================')
-# print('apriori took: ' + str(timeit.timeit(apriori,number=1)))
 
 #aprioris=apriori()
 #hashes=hash_apriori()
