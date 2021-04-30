@@ -36,18 +36,17 @@ class HashTree:
         self.root = InteriorNode(h)
 
     # entry-point method for populating the hashtree
-    def insert_candidate(self, candidate, verbose=False):
-        self.insert(self.root, candidate, 0, verbose)
+    def insert_candidate(self, candidate):
+        self.insert(self.root, candidate, 0)
         self.population += 1
 
     # recursive search for the right place to insert
     # k = current level in three
     # current_node = the starting node for a given branch of recursion
-    def insert(self, current_node, itemset, k, verbose):
+    def insert(self, current_node, itemset, k):
 
         #if leaf node has been reached, we insert the itemset here
         if isinstance(current_node, LeafNode):
-            if verbose: print('inserting ' + str(itemset) + ' into leaf with ' + str(current_node.itemsets))
             current_node.itemsets.append(itemset)
         
         #else we need to search further
@@ -61,18 +60,16 @@ class HashTree:
                     next_node = LeafNode()
                     self.leaf_nodes += 1
 
-                    if verbose: print('created leaf node expecting to insert' + str(itemset))
                     # set the new node to the head of linked of leaf nodes and point to the previous last added node
                     next_node.next_leaf = self.last_leaf
                     self.last_leaf = next_node
                 else:
-                    if verbose: print('inserted interior node at level ' + str(k + 1))
                     next_node = InteriorNode(self.h)
                 # make the current node properly point to the new node
                 current_node.childs[direction] = next_node
 
             # if the next node does exist (or was just created), simply advance the recursion
-            self.insert(next_node, itemset, k + 1, verbose)
+            self.insert(next_node, itemset, k + 1)
 
     #tells whether the candidate is in the hashtree. 
     def lookup(self, candidate):

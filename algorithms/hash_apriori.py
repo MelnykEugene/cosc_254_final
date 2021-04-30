@@ -13,6 +13,8 @@ print('dataset:' + dataset)
 minsup = int(sys.argv[2])  # absolute
 print('minsup: ' + str(minsup))
 
+#determines the out-degree of internal nodes in our tree. the degree will be |itemset_alphabet|*branch_fraction
+#so that branch_fraction=1 corresponds precisely to full trie on our itemset alphabet
 branch_fraction = float(sys.argv[3])
 
 def hash_apriori(verbose=True):
@@ -32,11 +34,19 @@ def hash_apriori(verbose=True):
                 items_support[item] += 1
 
     if verbose: print('read transactions into memory')
-    global branch_factor
-    branch_factor=max_item
-    if verbose: print('branch factor set to ' + str(branch_factor))
 
+    #flag as to wether we have a max-width tree (i.e trie) or not
+    full_tree=False
+    branch_factor=int(max_item*branch_fraction)
+    if branch_fraction==1:
+        full_tree=True
+
+    if verbose: 
+        print('branch factor set to ' + str(branch_factor))
+        if full_tree:
+            print('branch fraction = 1, using optimized candidate generation...')
     print()
+
     frequent_items = [x for x in items_support.keys() if items_support[x] >= minsup]
     if not frequent_items:
         return []
@@ -52,9 +62,9 @@ def hash_apriori(verbose=True):
     while True:
         if verbose: print('mining candidate tree for k = ' + str(k + 1))
         if k == 1:
-            candidates_tree_kp1 = get_candidates_2(frequent_tree_k, verbose=False)
+            candidates_tree_kp1 = get_candidates_2(frequent_tree_k,branch_factor)
         else:
-            candidates_tree_kp1 = get_candidates_kp1(frequent_tree_k, verbose=False)
+            candidates_tree_kp1 = get_candidates_kp1_router(frequent_tree_k, branch_factor, full_tree)
         
         if candidates_tree_kp1.get_candidate_count() == 0:
             if verbose: print('found no new candidates at k = ' + str(k + 1))
@@ -97,24 +107,28 @@ def hash_apriori(verbose=True):
         if frequent_tree_k.get_candidate_count() == 0:
             if verbose: print('finished')
             break
-    print(len(frequent_itemsets))
-    write_to_file(frequent_itemsets,dataset,minsup)
+        
+    write_to_file(frequent_itemsets,dataset,minsup,branch_fraction)
     return frequent_itemsets
 
 
 # generates candidates of length 2 in simple way
-def get_candidates_2(frequent_items, verbose=False):
+def get_candidates_2(frequent_items,branch_factor):
     candidate_tree = HashTree(2, branch_factor)
     for i in range(len(frequent_items)):
         for j in range(i + 1, len(frequent_items)):
-            candidate_tree.insert_candidate(ItemSet([frequent_items[i], frequent_items[j]]), verbose)
+            candidate_tree.insert_candidate(ItemSet([frequent_items[i], frequent_items[j]]))
     return candidate_tree
 
+# router function to decide which mode of generation to use
+def get_candidates_kp1_router(hashtree_k,branch_factor,full_tree):
+    if full_tree: return get_candidates_kp1_full_tree(hashtree_k,branch_factor)
+    else: return get_candidates_kp1(hashtree_k,branch_factor)
 
 # generates candidates of length k+1
 # using the union of candidates of length k that share first k-1 items (like normal apriori)
 # leveraging lexicographic order and the fact that candidates sharing the first k-1 items live in the same leaf
-def get_candidates_kp1(hashtree_k, verbose=False):
+def get_candidates_kp1_full_tree(hashtree_k,branch_factor):
     k = hashtree_k.itemset_size
     candidate_hashtree_kp1 = HashTree(k + 1, branch_factor)
 
@@ -137,12 +151,38 @@ def get_candidates_kp1(hashtree_k, verbose=False):
                     continue
                 
                 if check_frequency_of_all_immediate_subsets(candidate, hashtree_k):
-                    candidate_hashtree_kp1.insert_candidate(ItemSet(candidate), verbose)
+                    candidate_hashtree_kp1.insert_candidate(ItemSet(candidate))
 
         node = node.next_leaf
 
     return candidate_hashtree_kp1
 
+def get_candidates_kp1(hashtree_k,branch_factor):
+    k = hashtree_k.itemset_size
+    candidate_hashtree_kp1 = HashTree(k + 1, branch_factor)
+
+    node = hashtree_k.last_leaf
+    prev_frequents=[]
+
+    while node is not None:
+        prev_frequents.extend(node.itemsets)
+        node = node.next_leaf
+    
+    for i in range(len(prev_frequents)):
+        itemset1 = prev_frequents[i]
+        for j in range(i + 1, len(prev_frequents)):
+            itemset2 = prev_frequents[j]
+            if itemset1.itemset[:-1]==itemset2.itemset[:-1] and itemset1.itemset[-1] < itemset2.itemset[-1]:
+                candidate = []
+                candidate.extend(itemset1.itemset)
+                candidate.append(itemset2.itemset[-1])
+            else:
+                continue
+                
+            if check_frequency_of_all_immediate_subsets(candidate, hashtree_k):
+                candidate_hashtree_kp1.insert_candidate(ItemSet(candidate))
+
+    return candidate_hashtree_kp1
 
 # prunes candidates of length K+1 if they contain a non-frequent subset of length K
 # we do so by looking up subsets in the previous-iteration frequent tree
@@ -157,9 +197,9 @@ def check_frequency_of_all_immediate_subsets(candidate_kp1, hash_tree_k):
             return False
     return True
 
-def write_to_file(frequent_itemsets,dataset,minsup):
+def write_to_file(frequent_itemsets,dataset,minsup,branch_fraction):
     input_file = dataset.split('/')[-1]
-    output = './output/hash_apriori_' + input_file + '_' + str(minsup) +'.txt'
+    output = './output/hash_apriori_' + input_file + '_' + str(minsup) + '_' + 'br:'+ str(branch_fraction)+'.txt'
 
     #https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
     if not os.path.exists(os.path.dirname(output)):
@@ -173,6 +213,7 @@ def write_to_file(frequent_itemsets,dataset,minsup):
         f.truncate()
         for item in frequent_itemsets:
             f.write(str(item[0]) + '   ' + str(item[1])+'\n')
+    
 
 
 #aprioris = apriori()
