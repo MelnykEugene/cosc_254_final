@@ -1,7 +1,8 @@
 # cosc_254_final
 
 Usage format:
-cd cs_254_final
+
+	cd cs_254_final
 	python3 algorithms/apriori.py (str)dataset_filename (int)minsup
 	python3 algorithms/\_hashapriori.py dataset_filename (int)minsup (float 0<x<=1) branch_fraction
 	python3 algorithms/\eclat.py dataset_filename (int)minsup 
