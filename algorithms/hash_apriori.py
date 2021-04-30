@@ -4,14 +4,16 @@ from item_set import ItemSet
 from hash_tree import HashTree
 import timeit
 import tracemalloc
+import os
 
-tracemalloc.start()
-dataset = 'datasets/mushroom.dat'
+#tracemalloc.start()
+dataset = sys.argv[1]
+dataset = './datasets/'+dataset
 print('dataset:' + dataset)
-minsup = float(sys.argv[1])  # absolute
+minsup = int(sys.argv[2])  # absolute
 print('minsup: ' + str(minsup))
-branch_factor = None
 
+branch_fraction = float(sys.argv[3])
 
 def hash_apriori(verbose=True):
     # in-memory transaction storage
@@ -96,6 +98,7 @@ def hash_apriori(verbose=True):
             if verbose: print('finished')
             break
     print(len(frequent_itemsets))
+    write_to_file(frequent_itemsets,dataset,minsup)
     return frequent_itemsets
 
 
@@ -154,19 +157,38 @@ def check_frequency_of_all_immediate_subsets(candidate_kp1, hash_tree_k):
             return False
     return True
 
+def write_to_file(frequent_itemsets,dataset,minsup):
+    input_file = dataset.split('/')[-1]
+    output = './output/hash_apriori_' + input_file + '_' + str(minsup) +'.txt'
+
+    #https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
+    if not os.path.exists(os.path.dirname(output)):
+        try:
+            os.makedirs(os.path.dirname(output))
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+        
+    with open(output,'w') as f:
+        f.truncate()
+        for item in frequent_itemsets:
+            f.write(str(item[0]) + '   ' + str(item[1])+'\n')
+
 
 #aprioris = apriori()
 #hashes=hash_apriori()
 
 #t10i4d100k with minsup = 1000 shows a performance improvement of 90x. takes about 1h to run
-print('hashapriori took: '+str(timeit.timeit(hash_apriori,number=1)))
-current, peak = tracemalloc.get_traced_memory()
-print(f"Current memory usage is {current / 10 ** 6}MB; Peak was {peak / 10 ** 6}MB")
-tracemalloc.stop()
+#print('hashapriori took: '+str(timeit.timeit(hash_apriori,number=1)))
+#current, peak = tracemalloc.get_traced_memory()
+#print(f"Current memory usage is {current / 10 ** 6}MB; Peak was {peak / 10 ** 6}MB")
+#tracemalloc.stop()
 # print(hash_apriori())
-print('=========================================================')
-# print('apriori took: ' + str(timeit.timeit(apriori,number=1)))
+if __name__=='__main__':
+    print('Hash-Tree-Apriori')
+    print('found ' + str(len(hash_apriori())) + ' frequent itemsets, check output directory')
 
+# print('apriori took: ' + str(timeit.timeit(apriori,number=1)))
 #aprioris=apriori()
 #hashes=hash_apriori()
 #print('difference in output: '+str([x for x in aprioris if x not in hashes] + [x for x in hashes if x not in aprioris]))

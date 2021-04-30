@@ -4,23 +4,24 @@ import math
 from item_set import ItemSet
 import tracemalloc
 import timeit
+import os
 
-dataset = 'datasets/mushroom.dat'
-output =  sys.argv[1]
-minsup = float(sys.argv[2])  # absolute
-data_size = int(sys.argv[3]) #not needed for apriori/hashapriori
+dataset = sys.argv[1]
+dataset='./datasets/'+dataset
+minsup = int(sys.argv[2])  # absolute
 
 def wrapper(func, *args, **kwargs):
     def wrapped():
         return func(*args, **kwargs)
     return wrapped
 
-def apriori(verbose=False):
+def apriori(verbose=True):
     # in-memory transaction storage
     transactions = []
 
     # this can be made into an array indexed by int(item) to save memory
     items_support = collections.defaultdict(int)
+
 
     with open(dataset, 'r') as f:
         for line in f:
@@ -63,6 +64,7 @@ def apriori(verbose=False):
         if not frequentsK:
             break
 
+    write_to_file(frequent_itemsets,dataset,minsup)
     return frequent_itemsets
 
 
@@ -128,15 +130,39 @@ def check_candidate_support(candidate, transactions):
         return True
     else:
         return False
-if __name__ == '__main__':
-    print("apriori")
-    tracemalloc.start()
-    wrappedeapriori = wrapper(apriori)
-    time_apriori = timeit.timeit(wrappedeapriori, number=1)*1000
-    print("milliseconds",time_apriori)
-    print("seconds",time_apriori/1000)
-    print("minutes",time_apriori/60000)
-    current, peak = tracemalloc.get_traced_memory()
-    print(f"Current memory usage is {current / 10 ** 6}MB; Peak was {peak / 10 ** 6}MB")
-    tracemalloc.stop()
-    print(len(apriori()))
+
+def write_to_file(frequent_itemsets,dataset,minsup):
+    input_file = dataset.split('/')[-1]
+    output = './output/apriori_' + input_file + '_' + str(minsup) +'.txt'
+
+    #https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
+    if not os.path.exists(os.path.dirname(output)):
+        try:
+            os.makedirs(os.path.dirname(output))
+        except OSError as exc: # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+        
+    with open(output,'w') as f:
+        f.truncate()
+        for item in frequent_itemsets:
+            f.write(str(item[0]) + '   ' + str(item[1])+'\n')
+
+
+
+if __name__=='__main__':
+    print('Apriori')
+    print('found ' + str(len(apriori())) + ' frequent itemsets, check output directory')
+
+# if __name__ == '__main__':
+#     print("apriori")
+#     tracemalloc.start()
+#     wrappedeapriori = wrapper(apriori)
+#     time_apriori = timeit.timeit(wrappedeapriori, number=1)*1000
+#     print("milliseconds",time_apriori)
+#     print("seconds",time_apriori/1000)
+#     print("minutes",time_apriori/60000)
+#     current, peak = tracemalloc.get_traced_memory()
+#     print(f"Current memory usage is {current / 10 ** 6}MB; Peak was {peak / 10 ** 6}MB")
+#     tracemalloc.stop()
+#     print(len(apriori()))
