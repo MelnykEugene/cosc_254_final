@@ -113,7 +113,7 @@ def hash_apriori(branch_fraction,verbose=True):
             if verbose: print('finished')
             break
 
-    write_to_file(frequent_itemsets,dataset,minsup,branch_fraction)
+    #write_to_file(frequent_itemsets,dataset,minsup,branch_fraction)
     return frequent_itemsets
 
 
@@ -219,23 +219,10 @@ def write_to_file(frequent_itemsets,dataset,minsup,branch_fraction):
         for item in frequent_itemsets:
             f.write(str(item[0]) + '   ' + str(item[1])+'\n')
     
+fractions=[1,0.9,0.8,0.7,0.6,0.5,0.4,0.3,0.2,0.1]
+times=[]
+for i in fractions:
+    wrapped=wrapper(hash_apriori,i)
+    times.append(timeit.timeit(wrapped,number=1))
 
-
-#aprioris = apriori()
-#hashes=hash_apriori()
-
-#t10i4d100k with minsup = 1000 shows a performance improvement of 90x. takes about 1h to run
-#print('hashapriori took: '+str(timeit.timeit(hash_apriori,number=1)))
-#current, peak = tracemalloc.get_traced_memory()
-#print(f"Current memory usage is {current / 10 ** 6}MB; Peak was {peak / 10 ** 6}MB")
-#tracemalloc.stop()
-# print(hash_apriori())
-if __name__=='__main__':
-    print('Hash-Tree-Apriori')
-    print('found ' + str(len(hash_apriori(branch_fraction))) + ' frequent itemsets, check output directory')
-
-# print('apriori took: ' + str(timeit.timeit(apriori,number=1)))
-#aprioris=apriori()
-#hashes=hash_apriori()
-#print('difference in output: '+str([x for x in aprioris if x not in hashes] + [x for x in hashes if x not in aprioris]))
-
+print(times)
