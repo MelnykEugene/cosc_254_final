@@ -8,16 +8,7 @@ def process_file(file):
     
 transactions_list = process_file('newacc.txt')
 
-class node:
-    def __init__(self, word, word_count=0, parent=None, link=None):
-        self.word= word
-        self.word_count=word_count
-        self.parent=parent
-        self.link=link
-        self.children={}
-
-  
-              
+            
 class node:
     def __init__(self, word, word_count=0, parent=None, link=None):
         self.word=word
@@ -26,18 +17,7 @@ class node:
         self.link=link
         self.children={}
 
-#tree traversal
-    def visittree(self):
-#        if self is None:
-#            return None
-        output=[]
-        output.append(str(vocabdic[self.word]) + " " +str(self.word_count))
-        if len(list(self.children.keys()))>0:
-            for i in (list(self.children.keys())):
-                output.append(self.children[i].visittree())
-        return output
-  
-              
+             
 '''      Build FPTREE class and method       '''        
 class fptree:
     def __init__(self, data, minsup=400):
