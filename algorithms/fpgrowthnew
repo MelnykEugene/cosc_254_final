@@ -156,6 +156,7 @@ class fptree:
           
           
 min_sup=1500
+# replace 'newacc' with your file path
 transactions_list = process_file('newacc.txt')
 
 fp_tree = fptree(transactions_list, min_sup) #create FP tree on data
