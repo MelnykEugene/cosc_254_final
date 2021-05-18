@@ -5,10 +5,7 @@ def process_file(file):
             transaction = line.split()
             transactions_list.append(transaction)
     return transactions_list
-    
-transactions_list = process_file('newacc.txt')
-
-            
+ 
 class node:
     def __init__(self, word, word_count=0, parent=None, link=None):
         self.word=word
@@ -16,8 +13,8 @@ class node:
         self.parent=parent
         self.link=link
         self.children={}
-
-             
+  
+              
 '''      Build FPTREE class and method       '''        
 class fptree:
     def __init__(self, data, minsup=400):
@@ -159,6 +156,7 @@ class fptree:
           
           
 min_sup=1500
+transactions_list = process_file('newacc.txt')
 
 fp_tree = fptree(transactions_list, min_sup) #create FP tree on data
 
