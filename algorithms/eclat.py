@@ -3,12 +3,13 @@
 #import statements
 from collections import OrderedDict
 import sys
+import os
 
 #global variables
 # a dictionary to hold the all the frequent itemsets
 FinalDataStructure = OrderedDict()
 # the minimum support to compare against, as a number of transactions
-minsup = int(sys.argv[1])
+minsup = int(sys.argv[2])
 
 #a function that converts a horizontal dataset to a vertical, as well as finding the frequent items of k = 1
 def setup():
@@ -19,7 +20,7 @@ def setup():
     # Counter for transactions
     TransactionCount = 0
     # Reading in the dataset of interest
-    with open("datasets/mushroom.dat", "rt") as file:
+    with open(sys.argv[1], "rt") as file:
         # For each transaction
         for transaction in file:
             # Increment Transaction count
@@ -107,6 +108,27 @@ def eclat(FrequentItemsPrevious):
     if len(FrequentItemsCurrent) > 0:
         # Recursively call it with the frequent itemsets at the current level
         eclat(FrequentItemsCurrent)
+
+
+def write_to_file(frequent_itemsets, dataset, minsup):
+    input_file = dataset.split('/')[-1]
+    output = './output/eclat_' + input_file + '_' + str(minsup) + '.txt'
+
+    # https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
+    if not os.path.exists(os.path.dirname(output)):
+        try:
+            os.makedirs(os.path.dirname(output))
+        except OSError as exc:  # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
+    with open(output, 'w') as f:
+        f.truncate()
+        for item in frequent_itemsets:
+            f.write(item + '\n')
+    return output
+
+
 if __name__ == '__main__':
     #Just saying what algo we're running
     print("Eclat")
@@ -114,6 +136,6 @@ if __name__ == '__main__':
     FI = setup()
     # Running Eclat
     eclat(FI)
-    #print("itemsets",FinalDataStructure.keys())
+    output_name = write_to_file(FinalDataStructure,sys.argv[1],minsup)
     # printing the final number of frequent itemsets
-    print("Support:", minsup, "Frequent Itemsets:", len(FinalDataStructure))
+    print("Support: " + str(minsup) + ", Frequent Itemsets: " + str(len(FinalDataStructure)) + ", Check " + output_name + " for Itemsets")

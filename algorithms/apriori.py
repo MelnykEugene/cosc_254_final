@@ -5,7 +5,7 @@ from item_set import ItemSet
 import os
 
 dataset = sys.argv[1]
-dataset='./datasets/'+dataset
+dataset = './datasets/'+dataset
 minsup = int(sys.argv[2])  # absolute
 
 def apriori(verbose=True):
