@@ -164,7 +164,9 @@ def write_to_file(frequent_itemsets, dataset, minsup):
     with open(output, 'w') as f:
         f.truncate()
         for item in frequent_itemsets:
-            f.write(str(item[0]) + '   ' + str(item[1])+'\n')
+            # f.write(str(item[0]) + '   ' + str(item[1])+'\n')
+            f.write(str(item)+'\n')
+
     return output
 
 if __name__ == '__main__':

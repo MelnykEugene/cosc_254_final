@@ -96,7 +96,12 @@ def write_to_file(frequent_itemsets, dataset, minsup):
     with open(output, 'w') as f:
         f.truncate()
         for item in frequent_itemsets:
-            f.write(item + ' ' + str(diffSets.get(item)[0]) + '\n')
+            finalString = ""
+            for x in item.split():
+                finalString += x
+                if x != item.split()[len(item.split()) - 1]:
+                    finalString += ", "
+            f.write('[' + finalString + ']' + '   ' + str(diffSets.get(item)[0]) + '\n')
     return output
 
 
@@ -105,5 +110,4 @@ if __name__ == '__main__':
     into = vertical_layout(filename)
     dEclat(into)
     output_name = write_to_file(diffSets, sys.argv[1], minsup)
-    print(diffSets.get("36 39 85 86 90")[0])
     print("Support: " + str(minsup) + ", Frequent Itemsets: " + str(len(diffSets)) + ", Check " + output_name + " for Itemsets")

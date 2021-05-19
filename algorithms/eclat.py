@@ -127,7 +127,12 @@ def write_to_file(frequent_itemsets, dataset, minsup):
     with open(output, 'w') as f:
         f.truncate()
         for item in frequent_itemsets:
-            f.write('[' + item + ']' + ' ' + str(len(FinalDataStructure[item])) + '\n')
+            finalString = ""
+            for x in item.split():
+                finalString += x
+                if x != item.split()[len(item.split())-1]:
+                    finalString += ", "
+            f.write('[' + finalString + ']' + '   ' + str(len(FinalDataStructure[item])) + '\n')
     return output
 
 
@@ -139,6 +144,5 @@ if __name__ == '__main__':
     # Running Eclat
     eclat(FI)
     output_name = write_to_file(FinalDataStructure,sys.argv[1],minsup)
-    print(len(FinalDataStructure["34 36 39 86 90"]))
     # printing the final number of frequent itemsets
     print("Support: " + str(minsup) + ", Frequent Itemsets: " + str(len(FinalDataStructure)) + ", Check " + output_name + " for Itemsets")
