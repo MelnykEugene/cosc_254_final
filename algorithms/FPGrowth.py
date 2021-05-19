@@ -172,7 +172,7 @@ def write_to_file(frequent_itemsets, dataset, minsup):
 if __name__ == '__main__':
     print("FPGrowth")
     minsup = int(sys.argv[2])
-    transactions_list = process_file(sys.argv[1])
+    transactions_list = process_file("./datasets/" + sys.argv[1])
 
     fp_tree = fptree(transactions_list, minsup)
 

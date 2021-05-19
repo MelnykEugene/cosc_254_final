@@ -2,7 +2,7 @@ import os
 import sys
 
 # give filename in argument
-filename = sys.argv[1]
+filename = "./datasets/" + sys.argv[1]
 minsup = int(sys.argv[2])
 #dict to hold initial tids
 tidSets = {}

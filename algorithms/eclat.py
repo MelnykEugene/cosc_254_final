@@ -20,7 +20,7 @@ def setup():
     # Counter for transactions
     TransactionCount = 0
     # Reading in the dataset of interest
-    with open(sys.argv[1], "rt") as file:
+    with open(("./datasets/" + sys.argv[1]), "rt") as file:
         # For each transaction
         for transaction in file:
             # Increment Transaction count
