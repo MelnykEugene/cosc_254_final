@@ -2,21 +2,13 @@
 
 #import statements
 from collections import OrderedDict
-import timeit
 import sys
-import tracemalloc
 
 #global variables
 # a dictionary to hold the all the frequent itemsets
 FinalDataStructure = OrderedDict()
 # the minimum support to compare against, as a number of transactions
 minsup = int(sys.argv[1])
-
-#wrapper for time analysis
-def wrapper(func, *args, **kwargs):
-    def wrapped():
-        return func(*args, **kwargs)
-    return wrapped
 
 #a function that converts a horizontal dataset to a vertical, as well as finding the frequent items of k = 1
 def setup():
@@ -117,22 +109,11 @@ def eclat(FrequentItemsPrevious):
         eclat(FrequentItemsCurrent)
 if __name__ == '__main__':
     #Just saying what algo we're running
-    print("eclat")
-    tracemalloc.start()
+    print("Eclat")
     # Getting the frequent itemsets of size 1 in a vertical format
     FI = setup()
-    # running eclat in a time wrapper
-    wrappedeclat = wrapper(eclat,FI)
-    # getting the runtime
-    time_eclat = timeit.timeit(wrappedeclat, number=1)*1000
-    #printing the runtime in different units
-    print("milliseconds",time_eclat)
-    print("seconds",time_eclat/1000)
-    print("minutes",time_eclat/60000)
-    # printing the final frequent itemsets
-    print("itemsets",FinalDataStructure.keys())
+    # Running Eclat
+    eclat(FI)
+    #print("itemsets",FinalDataStructure.keys())
     # printing the final number of frequent itemsets
-    print("number of itemsets",len(FinalDataStructure))
-    current, peak = tracemalloc.get_traced_memory()
-    print(f"Current memory usage is {current / 10 ** 6}MB; Peak was {peak / 10 ** 6}MB")
-    tracemalloc.stop()
+    print("Support:", minsup, "Frequent Itemsets:", len(FinalDataStructure))

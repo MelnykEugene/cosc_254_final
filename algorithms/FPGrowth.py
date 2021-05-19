@@ -1,6 +1,4 @@
-import timeit
-import tracemalloc
-
+import sys
 
 def process_file(file):
     transactions_list = []
@@ -151,24 +149,14 @@ class fptree:
 
 if __name__ == '__main__':
     print("FPGrowth")
-    supps = [0]
-    for y in range(3):
-        for x in supps:
-            start = timeit.default_timer()
-            tracemalloc.start()
-            min_sup = x
-            transactions_list = process_file('T10I4D100K.dat')
+    min_sup = int(sys.argv[2])
+    transactions_list = process_file(sys.argv[1])
 
-            fp_tree = fptree(transactions_list, min_sup)
+    fp_tree = fptree(transactions_list, min_sup)
 
-            frequentitemset = fp_tree.findfreqitemsets()
-            print(x, len(frequentitemset))
+    frequentitemset = fp_tree.findfreqitemsets()
+    print("Support:", min_sup, "Frequent Itemsets:" , len(frequentitemset))
 
-            current, peak = tracemalloc.get_traced_memory()
-            print(f"Current memory usage is {current / 10 ** 6}MB; Peak was {peak / 10 ** 6}MB")
-            tracemalloc.stop()
-            stop = timeit.default_timer()
-            print('Time: ', stop - start)
 
 
 

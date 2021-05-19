@@ -2,11 +2,8 @@ import sys
 import collections
 from item_set import ItemSet
 from hash_tree import HashTree
-import timeit
-import tracemalloc
 import os
 
-#tracemalloc.start()
 dataset = sys.argv[1]
 dataset = './datasets/'+dataset
 print('dataset:' + dataset)
@@ -17,10 +14,6 @@ print('minsup: ' + str(minsup))
 #so that branch_fraction=1 corresponds precisely to full trie on our itemset alphabet
 branch_fraction = float(sys.argv[3])
 
-def wrapper(func, *args, **kwargs):
-    def wrapped():
-        return func(*args, **kwargs)
-    return wrapped
 
 def hash_apriori(branch_fraction,verbose=True):
     # in-memory transaction storage
@@ -223,18 +216,11 @@ def write_to_file(frequent_itemsets,dataset,minsup,branch_fraction):
 
 #aprioris = apriori()
 #hashes=hash_apriori()
-
-#t10i4d100k with minsup = 1000 shows a performance improvement of 90x. takes about 1h to run
-#print('hashapriori took: '+str(timeit.timeit(hash_apriori,number=1)))
-#current, peak = tracemalloc.get_traced_memory()
-#print(f"Current memory usage is {current / 10 ** 6}MB; Peak was {peak / 10 ** 6}MB")
-#tracemalloc.stop()
 # print(hash_apriori())
 if __name__=='__main__':
     print('Hash-Tree-Apriori')
     print('found ' + str(len(hash_apriori(branch_fraction))) + ' frequent itemsets, check output directory')
 
-# print('apriori took: ' + str(timeit.timeit(apriori,number=1)))
 #aprioris=apriori()
 #hashes=hash_apriori()
 #print('difference in output: '+str([x for x in aprioris if x not in hashes] + [x for x in hashes if x not in aprioris]))

@@ -2,18 +2,11 @@ import sys
 import collections
 import math
 from item_set import ItemSet
-import tracemalloc
-import timeit
 import os
 
 dataset = sys.argv[1]
 dataset='./datasets/'+dataset
 minsup = int(sys.argv[2])  # absolute
-
-def wrapper(func, *args, **kwargs):
-    def wrapped():
-        return func(*args, **kwargs)
-    return wrapped
 
 def apriori(verbose=True):
     # in-memory transaction storage
@@ -153,16 +146,3 @@ def write_to_file(frequent_itemsets,dataset,minsup):
 if __name__=='__main__':
     print('Apriori')
     print('found ' + str(len(apriori())) + ' frequent itemsets, check output directory')
-
-# if __name__ == '__main__':
-#     print("apriori")
-#     tracemalloc.start()
-#     wrappedeapriori = wrapper(apriori)
-#     time_apriori = timeit.timeit(wrappedeapriori, number=1)*1000
-#     print("milliseconds",time_apriori)
-#     print("seconds",time_apriori/1000)
-#     print("minutes",time_apriori/60000)
-#     current, peak = tracemalloc.get_traced_memory()
-#     print(f"Current memory usage is {current / 10 ** 6}MB; Peak was {peak / 10 ** 6}MB")
-#     tracemalloc.stop()
-#     print(len(apriori()))
