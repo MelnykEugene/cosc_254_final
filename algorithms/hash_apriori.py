@@ -218,8 +218,8 @@ def write_to_file(frequent_itemsets,dataset,minsup,branch_fraction):
 #hashes=hash_apriori()
 # print(hash_apriori())
 if __name__=='__main__':
-    print('Hash-Tree-Apriori')
-    print('found ' + str(len(hash_apriori(branch_fraction))) + ' frequent itemsets, check output directory')
+    print('Hash Apriori')
+    print("Support: " + str(minsup) + ", Frequent Itemsets: " + str(len(hash_apriori(branch_fraction))) + ", Check Output Directory for Itemsets")
 
 #aprioris=apriori()
 #hashes=hash_apriori()

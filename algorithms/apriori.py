@@ -145,4 +145,4 @@ def write_to_file(frequent_itemsets,dataset,minsup):
 
 if __name__=='__main__':
     print('Apriori')
-    print('found ' + str(len(apriori())) + ' frequent itemsets, check output directory')
+    print("Support: " + str(minsup) + ", Frequent Itemsets: " + str(len(apriori())) + ", Check Output Directory for Itemsets")
