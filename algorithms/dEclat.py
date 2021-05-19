@@ -1,3 +1,4 @@
+import os
 import sys
 
 # give filename in argument
@@ -80,8 +81,29 @@ def dEclat(prev_freq):
         dEclat(new_freq)
 
 
+def write_to_file(frequent_itemsets, dataset, minsup):
+    input_file = dataset.split('/')[-1]
+    output = './output/dEclat_' + input_file + '_' + str(minsup) + '.txt'
+
+    # https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
+    if not os.path.exists(os.path.dirname(output)):
+        try:
+            os.makedirs(os.path.dirname(output))
+        except OSError as exc:  # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
+    with open(output, 'w') as f:
+        f.truncate()
+        for item in frequent_itemsets:
+            f.write(item + ' ' + str(diffSets.get(item)[0]) + '\n')
+    return output
+
+
 if __name__ == '__main__':
     print("dEclat")
     into = vertical_layout(filename)
     dEclat(into)
-    print("Support:", minsup, "Frequent Itemsets:", len(diffSets))
+    output_name = write_to_file(diffSets, sys.argv[1], minsup)
+    print(diffSets.get("36 39 85 86 90")[0])
+    print("Support: " + str(minsup) + ", Frequent Itemsets: " + str(len(diffSets)) + ", Check " + output_name + " for Itemsets")

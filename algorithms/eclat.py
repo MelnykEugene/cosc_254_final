@@ -69,6 +69,7 @@ def eclat(FrequentItemsPrevious):
                 continue
             # finding the union of the two sets
             CandidateSet = FrequentItemsPrevious[x].intersection(FrequentItemsPrevious[y])
+            # print(len(CandidateSet))
             # if the support is larger than the min sup
             if (len(CandidateSet) >= minsup):
                 # String logic to calculate the new key
@@ -102,6 +103,7 @@ def eclat(FrequentItemsPrevious):
                 FrequentItemsCurrent[nextStr2[:-1]] = CandidateSet
                 # We also add the itemset (minus the weird space at the end) to the global frequent itemset dictionary
                 FinalDataStructure[nextStr2[:-1]] = CandidateSet
+                # print(CandidateSet)
         # incrementing logic counter
         index += 1
     # if there are still frequent items at this level
@@ -125,7 +127,7 @@ def write_to_file(frequent_itemsets, dataset, minsup):
     with open(output, 'w') as f:
         f.truncate()
         for item in frequent_itemsets:
-            f.write(item + '\n')
+            f.write('[' + item + ']' + ' ' + str(len(FinalDataStructure[item])) + '\n')
     return output
 
 
@@ -137,5 +139,6 @@ if __name__ == '__main__':
     # Running Eclat
     eclat(FI)
     output_name = write_to_file(FinalDataStructure,sys.argv[1],minsup)
+    print(len(FinalDataStructure["34 36 39 86 90"]))
     # printing the final number of frequent itemsets
     print("Support: " + str(minsup) + ", Frequent Itemsets: " + str(len(FinalDataStructure)) + ", Check " + output_name + " for Itemsets")

@@ -1,3 +1,4 @@
+import os
 import sys
 
 def process_file(file):
@@ -147,15 +148,36 @@ class fptree:
                         result.append(words)
         return result
 
+
+def write_to_file(frequent_itemsets, dataset, minsup):
+    input_file = dataset.split('/')[-1]
+    output = './output/FPGrowth_' + input_file + '_' + str(minsup) + '.txt'
+
+    # https://stackoverflow.com/questions/12517451/automatically-creating-directories-with-file-output
+    if not os.path.exists(os.path.dirname(output)):
+        try:
+            os.makedirs(os.path.dirname(output))
+        except OSError as exc:  # Guard against race condition
+            if exc.errno != errno.EEXIST:
+                raise
+
+    with open(output, 'w') as f:
+        f.truncate()
+        for item in frequent_itemsets:
+            f.write(str(item[0]) + '   ' + str(item[1])+'\n')
+    return output
+
 if __name__ == '__main__':
     print("FPGrowth")
-    min_sup = int(sys.argv[2])
+    minsup = int(sys.argv[2])
     transactions_list = process_file(sys.argv[1])
 
-    fp_tree = fptree(transactions_list, min_sup)
+    fp_tree = fptree(transactions_list, minsup)
 
     frequentitemset = fp_tree.findfreqitemsets()
-    print("Support:", min_sup, "Frequent Itemsets:" , len(frequentitemset))
+    # print(frequentitemset)
+    output_name = write_to_file(frequentitemset,sys.argv[1],minsup)
+    print("Support: " + str(minsup) + ", Frequent Itemsets: " + str(len(frequentitemset)) + ", Check " + output_name + " for Itemsets")
 
 
 
