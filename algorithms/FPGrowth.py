@@ -164,8 +164,12 @@ def write_to_file(frequent_itemsets, dataset, minsup):
     with open(output, 'w') as f:
         f.truncate()
         for item in frequent_itemsets:
-            # f.write(str(item[0]) + '   ' + str(item[1])+'\n')
-            f.write(str(item)+'\n')
+            finalString = ""
+            for x in item[0]:
+                finalString += x
+                finalString += ", "
+
+            f.write('[' + finalString[:-2] + ']' + '   ' + str(item[1])+'\n')
 
     return output
 
@@ -177,7 +181,6 @@ if __name__ == '__main__':
     fp_tree = fptree(transactions_list, minsup)
 
     frequentitemset = fp_tree.findfreqitemsets()
-    # print(frequentitemset)
     output_name = write_to_file(frequentitemset,sys.argv[1],minsup)
     print("Support: " + str(minsup) + ", Frequent Itemsets: " + str(len(frequentitemset)) + ", Check " + output_name + " for Itemsets")
 
