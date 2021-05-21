@@ -9,8 +9,4 @@ Usage format:
     python3 algorithms/dEclat.py dataset_filename minsup
     python3 algorithms/FPGrowth.py dataset_filename minsup
 
-ToDo's:
 
-Minsup thresholds that don't result in no frequent itemsets of lenth >=3 are not meaningful. Edit our graphs accordingly?
-
-edit ux and add usage examples for eclat/declat
