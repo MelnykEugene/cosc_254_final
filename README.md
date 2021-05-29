@@ -1,5 +1,7 @@
 # cosc_254_final
 
+Python implementation of five different algorithm for frequent itemsets mining
+
 Usage format:
 
     cd cs_254_final
